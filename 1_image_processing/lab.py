@@ -258,7 +258,7 @@ def correlate(image, kernel, boundary_behavior):
                 # gets the value of this specific pixel.
                 # It is relative to the ith pixel, in a box around it
                 val = get_pixel_bounds(image,int(i / image["width"])+j,(i % image["width"])+k, boundary_behavior)
-                # with this pixel, multiplies it by its corresponding 
+                # with this pixel, multiplies it by its corresponding
                 # element from the kernel
 
                 kernel_element = kernel[j+int(len(kernel)/2)][k+int(len(kernel)/2)]
@@ -356,7 +356,9 @@ def edges(image):
     the new pixel based on formula given. then turns it into an image dict
     and makes sure its values are valid with round_and_clip_image.
     """
-    kernel_1 = [[-1, -2, -1], [0,0,0], [1,2,1]]
+    kernel_1 = [[-1,-2,-1], 
+                [0,0,0], 
+                [1,2,1]]
     kernel_2 = [[-1,0,1], [-2,0,2], [-1,0,1]]
 
     o_1 = correlate(image, kernel_1, "extend")

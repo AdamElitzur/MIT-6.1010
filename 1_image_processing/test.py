@@ -151,12 +151,20 @@ def test_blurred_black_image():
     }
 
     result = lab.blurred(original, 3)
+    result2 = lab.blurred(original, 5)
     expected = {
         'height': 5,
         'width': 6,
         'pixels': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,],
     }
+    expected2 = {
+        'height': 5,
+        'width': 6,
+        'pixels': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,],
+    }
     compare_images(result, expected)
+    compare_images(result2, expected2)
+    
 
 def test_blurred_centered_pixel():
     # REPLACE THIS with your 2nd test case from section 5.1
