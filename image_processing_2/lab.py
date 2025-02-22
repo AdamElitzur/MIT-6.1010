@@ -9,6 +9,7 @@ Image Processing 2
 # (except in the last part of the lab; see the lab writeup for details)
 import math
 import os
+
 # import typing  # optional import
 from PIL import Image
 
@@ -28,21 +29,22 @@ def set_pixel(image, row, col, color):
     """
     image["pixels"][row][col] = color
 
+
 def apply_per_pixel(image, func):
     """
     makes a new result but loops over the pixels and applies func to it
     """
     result = {
         "height": image["height"],
-        "width": image["width"], # fixed typo
+        "width": image["width"],  # fixed typo
         "pixels": image["pixels"].copy(),
     }
-    for row in range(image["height"]): # switched names to row
+    for row in range(image["height"]):  # switched names to row
         for col in range(image["width"]):
             # gets each pixel and finds the new color from func, then sets it as result
-            color = get_pixel(image, row, col) # switched order row and col
+            color = get_pixel(image, row, col)  # switched order row and col
             new_color = func(color)
-            set_pixel(result, row, col, new_color) # tabbed this in one
+            set_pixel(result, row, col, new_color)  # tabbed this in one
 
     # original:
     # for col in range(image["height"]):
@@ -55,11 +57,11 @@ def apply_per_pixel(image, func):
 
 def fix_list(image):
     """
-    takes image and returns a new pixels array, 
+    takes image and returns a new pixels array,
     but this time it's 2d, with many lists of rows as inner lists.
-    This way you can get a specific pixel much easier, by knowing the row 
+    This way you can get a specific pixel much easier, by knowing the row
     and column
-    input: 
+    input:
     {
     "height": 3,
     "width": 2,
@@ -75,7 +77,8 @@ def fix_list(image):
         else:
             final[-1].append(image["pixels"][i])
     return final
-        # image["height"]
+    # image["height"]
+
 
 def inverted(image):
     """
@@ -85,12 +88,12 @@ def inverted(image):
     # turning 1d array into 2d array with rows and cols
     new_pixels = fix_list(image)
     new_image = {
-    "height": image["height"],
-    "width": image["width"],
-    "pixels": new_pixels,
-}
+        "height": image["height"],
+        "width": image["width"],
+        "pixels": new_pixels,
+    }
     # calling apply_per_pixel on this new image with 2d arraw pixels
-    inverted_image = apply_per_pixel(new_image, lambda color: 255-color)
+    inverted_image = apply_per_pixel(new_image, lambda color: 255 - color)
     # changed from 256-color
 
     final = []
@@ -103,21 +106,30 @@ def inverted(image):
 
 
 # HELPER FUNCTIONS
+
+
 def get_pixel_bounds(image, row, col, behavior):
     """
-    returns the pixel requested at row, col, 
+    returns the pixel requested at row, col,
     with options for out of bounds behavior
 
     this is a complicated function due to the out of bound behavior
     there is an if statement for every possible out of bound
     if row, col is
     + +, + -, - -, - +
+    row = max(0, row)
+    min(max(0, row), )
+
     """
 
     # If everything is within bounds
     if 0 <= row < image["height"] and 0 <= col < image["width"]:
         # get the pixel, however, it's not a 2d array so we use math to get it
-        return image["pixels"][image["width"]*row + col]
+        return image["pixels"][image["width"] * row + col]
+
+    # if behavior is infinity and out of bounds, return inf
+    if behavior == "infinity":
+        return float("inf")
 
     # if pixel row and col is -
     if col < 0 and row < 0:
@@ -131,10 +143,12 @@ def get_pixel_bounds(image, row, col, behavior):
             # acting like a repeat wrap
             # out of bounds diagonally top left turns into pixel
             # from the bottom right
-            return image["pixels"][row % image["height"]*image["width"] + col % image["width"]]
+            return image["pixels"][
+                row % image["height"] * image["width"] + col % image["width"]
+            ]
 
     # if pixel row and col are both out of bounds +
-    if col > image["width"]-1 and row > image["height"]-1:
+    if col > image["width"] - 1 and row > image["height"] - 1:
         if behavior == "extend":
             # get the last pixel
             return image["pixels"][-1]
@@ -143,10 +157,11 @@ def get_pixel_bounds(image, row, col, behavior):
             # acting like a repeat wrap
             # out of bounds diagonally bottom right turns into pixel from the top left
 
-
-            return image["pixels"][(row % image["height"]) * image["width"] + (col % image["width"])]
+            row_index = (row % image["height"]) * image["width"]
+            col_index = col % image["width"]
+            return image["pixels"][row_index + col_index]
     # if pixel row and col are both out of bounds, row -, col +
-    if col > image["width"]-1 and row < 0:
+    if col > image["width"] - 1 and row < 0:
         if behavior == "extend":
             # get the last pixel in the first row
             return image["pixels"][image["width"] - 1]
@@ -155,12 +170,12 @@ def get_pixel_bounds(image, row, col, behavior):
             # acting like a repeat wrap
             # out of bounds diagonally bottom right turns into
             # pixel from the top left
-
-            return image["pixels"][(row % image["height"]) * image["width"] + (col % image["width"])]
-
+            row_index = (row % image["height"]) * image["width"]
+            col_index = col % image["width"]
+            return image["pixels"][row_index + col_index]
 
     # if pixel row and col are both out of bounds, row +, col -
-    if col < 0 and row > image["height"]-1:
+    if col < 0 and row > image["height"] - 1:
         if behavior == "extend":
             # get the first pixel in last row
             return image["pixels"][-image["width"]]
@@ -169,9 +184,9 @@ def get_pixel_bounds(image, row, col, behavior):
             # acting like a repeat wrap
             # out of bounds diagonally bottom right turns into pixel
             # from the top left
-
-            return image["pixels"][(row % image["height"]) * image["width"] + (col % image["width"])]
-
+            row_index = (row % image["height"]) * image["width"]
+            col_index = col % image["width"]
+            return image["pixels"][row_index + col_index]
 
     # if the row is out of bounds, pixel is vertically under or above the picture
     if row >= image["height"] or row < 0:
@@ -184,12 +199,12 @@ def get_pixel_bounds(image, row, col, behavior):
 
             # gets the last pixel in the frame in the same column
             else:
-                return image["pixels"][image["width"]*(image["height"]-1)+col]
+                return image["pixels"][image["width"] * (image["height"] - 1) + col]
         elif behavior == "wrap":
             # return the pixel of row % height row + col, acting like a repeat wrap
             # if row was 5, height=3, it would take 5 % 3 = 2, so it would
             # actually take the 2nd row
-            return image["pixels"][(row % image["height"])*image["width"] + col]
+            return image["pixels"][(row % image["height"]) * image["width"] + col]
 
     # if the column is out of bounds, pixel is to the left or right of picture
     if col >= image["width"] or col < 0:
@@ -200,15 +215,15 @@ def get_pixel_bounds(image, row, col, behavior):
             if col < 0:
                 # if col is -, get the pixel at position width*row.
                 # The 0th element on that row
-                return image["pixels"][image["width"]*row]
+                return image["pixels"][image["width"] * row]
             # else, get the pixel at position width*row+(width-1).
             # The last element on that row
-            return image["pixels"][image["width"]*row+(image["width"]-1)]
+            return image["pixels"][image["width"] * row + (image["width"] - 1)]
         elif behavior == "wrap":
             # return the pixel of row % height, acting like a repeat wrap
             # if row was 5, height=3, it would take 5 % 3 = 2, so it would
             # actually take the 2nd row
-            return image["pixels"][col % image["width"] + row*image["width"]]
+            return image["pixels"][col % image["width"] + row * image["width"]]
 
 
 def correlate(image, kernel, boundary_behavior):
@@ -237,7 +252,7 @@ def correlate(image, kernel, boundary_behavior):
     """
 
     # if no valid boundary_behavior, return None
-    if boundary_behavior != "zero" and boundary_behavior != "extend" and boundary_behavior != "wrap":
+    if boundary_behavior not in ["zero", "extend", "wrap"]:
         return None
 
     # making a temp duplicate array
@@ -245,7 +260,7 @@ def correlate(image, kernel, boundary_behavior):
 
     # loops over every current pixel
     for i in range(len(final_pixels)):
-        new_pixel=0 # initializes new_pixel to 0, but will add to it
+        new_pixel = 0  # initializes new_pixel to 0, but will add to it
 
         # int(len(kernel)/2) finds how many to go in the negative dir.
         # for 3x3, it's -1 -> 1. for 5x5, it's -2 -> 2
@@ -255,15 +270,22 @@ def correlate(image, kernel, boundary_behavior):
         # so if the kernel is 3x3, it will check the elements
         # all around and including the ith element
 
-        for j in range(-int(len(kernel)/2), int(len(kernel)/2)+1):
-            for k in range(-int(len(kernel)/2), int(len(kernel)/2)+1):
+        for j in range(-int(len(kernel) / 2), int(len(kernel) / 2) + 1):
+            for k in range(-int(len(kernel) / 2), int(len(kernel) / 2) + 1):
                 # gets the value of this specific pixel.
                 # It is relative to the ith pixel, in a box around it
-                val = get_pixel_bounds(image,int(i / image["width"])+j,(i % image["width"])+k, boundary_behavior)
-                # with this pixel, multiplies it by its corresponding 
+                val = get_pixel_bounds(
+                    image,
+                    int(i / image["width"]) + j,
+                    (i % image["width"]) + k,
+                    boundary_behavior,
+                )
+                # with this pixel, multiplies it by its corresponding
                 # element from the kernel
 
-                kernel_element = kernel[j+int(len(kernel)/2)][k+int(len(kernel)/2)]
+                kernel_element = kernel[j + int(len(kernel) / 2)][
+                    k + int(len(kernel) / 2)
+                ]
                 new_pixel += val * kernel_element
         # at the end of the calculation for each pixel,
         # it adds the new pixel element to final_pixels
@@ -275,6 +297,7 @@ def correlate(image, kernel, boundary_behavior):
         "width": image["width"],
         "pixels": final_pixels,
     }
+
 
 def round_and_clip_image(image):
     """
@@ -289,14 +312,15 @@ def round_and_clip_image(image):
     """
     for i in range(len(image["pixels"])):
         image["pixels"][i] = round(image["pixels"][i])
+
         if image["pixels"][i] < 0:
             image["pixels"][i] = 0
         elif image["pixels"][i] > 255:
             image["pixels"][i] = 255
 
 
-
 # FILTERS
+
 
 def get_kernel(kernel_size):
     """
@@ -312,7 +336,9 @@ def get_kernel(kernel_size):
     .1111 .1111 .1111
     """
 
-    return [[(1/kernel_size**2) for j in range(kernel_size)] for i in range(kernel_size)]
+    return [
+        [(1 / kernel_size**2) for j in range(kernel_size)] for i in range(kernel_size)
+    ]
 
 
 def blurred(image, kernel_size):
@@ -333,15 +359,16 @@ def blurred(image, kernel_size):
     round_and_clip_image(corr)
     return corr
 
-def sharpened(image,kernel_size):
+
+def sharpened(image, kernel_size):
     """
     takes the image, blurs it, enumerates over it, and makes a new image according to
     the formula 2*pixel - blur(pixel)
     """
     blurred_image = blurred(image, kernel_size)
     new_image_pixels = []
-    for i, pixel in enumerate(image["pixels"]): # do this for each pixel
-        new_image_pixels.append(2*pixel - blurred_image["pixels"][i])
+    for i, pixel in enumerate(image["pixels"]):  # do this for each pixel
+        new_image_pixels.append(2 * pixel - blurred_image["pixels"][i])
 
     # make new image dict to return
     new_image = {
@@ -349,8 +376,9 @@ def sharpened(image,kernel_size):
         "width": image["width"],
         "pixels": new_image_pixels,
     }
-    round_and_clip_image(new_image) # ensure it's a valid image
+    round_and_clip_image(new_image)  # ensure it's a valid image
     return new_image
+
 
 def edges(image):
     """
@@ -358,8 +386,8 @@ def edges(image):
     the new pixel based on formula given. then turns it into an image dict
     and makes sure its values are valid with round_and_clip_image.
     """
-    kernel_1 = [[-1, -2, -1], [0,0,0], [1,2,1]]
-    kernel_2 = [[-1,0,1], [-2,0,2], [-1,0,1]]
+    kernel_1 = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]]
+    kernel_2 = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]]
 
     o_1 = correlate(image, kernel_1, "extend")
     o_2 = correlate(image, kernel_2, "extend")
@@ -367,7 +395,7 @@ def edges(image):
     # iterates over each pixel using enumerate (more efficient than range)
     for i, pixel in enumerate(image["pixels"]):
         # uses formula from the lab
-        new_pixel = math.sqrt((o_1["pixels"][i])**2+(o_2["pixels"][i])**2)
+        new_pixel = math.sqrt((o_1["pixels"][i]) ** 2 + (o_2["pixels"][i]) ** 2)
         final_pixels.append(new_pixel)
 
     new_image = {
@@ -375,10 +403,8 @@ def edges(image):
         "width": image["width"],
         "pixels": final_pixels,
     }
-    round_and_clip_image(new_image) # ensure it's a valid image
+    round_and_clip_image(new_image)  # ensure it's a valid image
     return new_image
-
-
 
 
 # VARIOUS FILTERS
@@ -395,22 +421,11 @@ def split_color_image_to_greyscales(image):
         green.append(pixel[1])
         blue.append(pixel[2])
 
-    red_image = {
-        "height": image["height"],
-        "width": image["width"],
-        "pixels": red
-    }
-    green_image = {
-        "height": image["height"],
-        "width": image["width"],
-        "pixels": green
-    }
-    blue_image = {
-        "height": image["height"],
-        "width": image["width"],
-        "pixels": blue
-    }
+    red_image = {"height": image["height"], "width": image["width"], "pixels": red}
+    green_image = {"height": image["height"], "width": image["width"], "pixels": green}
+    blue_image = {"height": image["height"], "width": image["width"], "pixels": blue}
     return red_image, green_image, blue_image
+
 
 def combine_greyscales_to_color(red, green, blue):
     """
@@ -421,12 +436,9 @@ def combine_greyscales_to_color(red, green, blue):
     for i, pixel in enumerate(red["pixels"]):
         new_pixels.append((pixel, green["pixels"][i], blue["pixels"][i]))
 
-    new_image = {
-        "height": red["height"],
-        "width": red["width"],
-        "pixels": new_pixels
-    }
+    new_image = {"height": red["height"], "width": red["width"], "pixels": new_pixels}
     return new_image
+
 
 def color_filter_from_greyscale_filter(filt):
     """
@@ -434,6 +446,7 @@ def color_filter_from_greyscale_filter(filt):
     greyscale image as output, returns a function that takes a color image as
     input and produces the filtered color image.
     """
+
     def new(image):
         # splits into greyscale images per color
         red, green, blue = split_color_image_to_greyscales(image)
@@ -443,28 +456,33 @@ def color_filter_from_greyscale_filter(filt):
         filtered_blue = filt(blue)
         # combines and returns them
         return combine_greyscales_to_color(filtered_red, filtered_green, filtered_blue)
+
     return new
 
 
 def make_blur_filter(kernel_size):
     """
     Makes a new function that takes in an image
-    returns the blurred image with kernel_size from 
+    returns the blurred image with kernel_size from
     make_blur_filter call
     """
+
     def func(image):
         return blurred(image, kernel_size)
+
     return func
 
 
 def make_sharpen_filter(kernel_size):
     """
     Makes a new function that takes in an image
-    returns the sharpened image with kernel_size from 
+    returns the sharpened image with kernel_size from
     make_sharpen_filter call
     """
+
     def func(image):
         return sharpened(image, kernel_size)
+
     return func
 
 
@@ -474,6 +492,7 @@ def filter_cascade(filters):
     single filter such that applying that filter to an image produces the same
     output as applying each of the individual ones in turn.
     """
+
     def func(image):
         # makes a copy of the image so doesn't mutate it
         new_image = image.copy()
@@ -482,6 +501,7 @@ def filter_cascade(filters):
         for i in filters:
             new_image = i(new_image)
         return new_image
+
     return func
 
 
@@ -495,7 +515,13 @@ def seam_carving(image, ncols):
     Starting from the given image, use the seam carving technique to remove
     ncols (an integer) columns from the image. Returns a new image.
     """
-    raise NotImplementedError
+    for i in range(ncols):
+        greyscale = greyscale_image_from_color_image(image)
+        energy = compute_energy(greyscale)
+        c_energy_map = cumulative_energy_map(energy)
+        min_seam = minimum_energy_seam(c_energy_map)
+        image = image_without_seam(image, min_seam)
+    return image
 
 
 # Optional Helper Functions for Seam Carving
@@ -507,7 +533,12 @@ def greyscale_image_from_color_image(image):
 
     Returns a greyscale image (represented as a dictionary).
     """
-    raise NotImplementedError
+    new_pixels = []
+    for pixel in image["pixels"]:
+        # loops over every pixel, appends the formula from lab
+        new_pixels.append(round(0.299 * pixel[0] + 0.587 * pixel[1] + 0.114 * pixel[2]))
+    # returns new image
+    return {"width": image["width"], "height": image["height"], "pixels": new_pixels}
 
 
 def compute_energy(grey):
@@ -517,7 +548,8 @@ def compute_energy(grey):
 
     Returns a greyscale image (represented as a dictionary).
     """
-    raise NotImplementedError
+    return edges(grey)
+    # for some reason my values are one or two off. maybe rounding err?
 
 
 def cumulative_energy_map(energy):
@@ -530,7 +562,31 @@ def cumulative_energy_map(energy):
     the values in the 'pixels' array may not necessarily be in the range [0,
     255].
     """
-    raise NotImplementedError
+    new_image = {
+        "width": energy["width"],
+        "height": energy["height"],
+        "pixels": [0 for i in energy["pixels"]],
+    }
+
+    for i in range(0, energy["height"]):
+        for j in range(energy["width"]):
+            # first row
+            if i == 0:
+                new_image["pixels"][i * energy["width"] + j] = get_pixel_bounds(
+                    energy, i, j, "infinity"
+                )
+
+            else:
+                # get the minimum of the three values
+                minimum = min(
+                    get_pixel_bounds(new_image, i - 1, j - 1, "infinity"),
+                    get_pixel_bounds(new_image, i - 1, j, "infinity"),
+                    get_pixel_bounds(new_image, i - 1, j + 1, "infinity"),
+                )
+                new_image["pixels"][i * energy["width"] + j] = (
+                    energy["pixels"][i * energy["width"] + j] + minimum
+                )
+    return new_image
 
 
 def minimum_energy_seam(cem):
@@ -539,7 +595,31 @@ def minimum_energy_seam(cem):
     the 'pixels' list that correspond to pixels contained in the minimum-energy
     seam (computed as described in the lab 2 writeup).
     """
-    raise NotImplementedError
+    min_node = 0
+    min_node_column = 0
+    final_indices = []
+
+    # for the last row:
+    min_node = min(cem["pixels"][cem["width"] * (cem["height"] - 1) :])
+    min_node_column = cem["pixels"][cem["width"] * (cem["height"] - 1) :].index(
+        min_node
+    )
+    final_indices.append(min_node_column + (cem["height"] - 1) * cem["width"])
+
+    # loop over all the rows backwards except for last that we already did
+    for i in range(cem["height"] - 2, -1, -1):
+        # every other row:
+        # get the 3 adjacent pixels
+        adjacents = [
+            get_pixel_bounds(cem, i, min_node_column - 1, "infinity"),
+            get_pixel_bounds(cem, i, min_node_column, "infinity"),
+            get_pixel_bounds(cem, i, min_node_column + 1, "infinity"),
+        ]
+        min_node = min(adjacents)
+        min_node_column = adjacents.index(min_node) + min_node_column - 1
+        final_indices.append(min_node_column + i * cem["width"])
+
+    return final_indices
 
 
 def image_without_seam(image, seam):
@@ -549,10 +629,28 @@ def image_without_seam(image, seam):
     pixels from the original image except those corresponding to the locations
     in the given list.
     """
-    raise NotImplementedError
+    new_pixels = image["pixels"].copy()
+    for i, value in enumerate(seam):
+        new_pixels.pop(value) # remove the seam pixels
+    return {
+        "width": image["width"] - 1,
+        "height": image["height"],
+        "pixels": new_pixels,
+    }
+
+def custom_feature(image, color, x, y, radius):
+    """Draws a circle on the image."""
+    new_image = image.copy()
+    for row in range(new_image["height"]):
+        for col in range(new_image["width"]):
+            # Check if the pixel is within the circle's radius
+            if (col - x) ** 2 + (row - y) ** 2 <= radius**2:
+                new_image["pixels"][row * new_image["width"] + col] = color
+    return new_image
 
 
 # HELPER FUNCTIONS FOR DISPLAYING, LOADING, AND SAVING IMAGES
+
 
 def print_greyscale_values(image):
     """
@@ -577,9 +675,9 @@ def print_greyscale_values(image):
         else:
             col += 1
 
-    for (col, val) in space_vals:
+    for col, val in space_vals:
         out += f"{val.center(space_sizes[col])} "
-        if col == image["width"]-1:
+        if col == image["width"] - 1:
             out += "\n "
     print(out)
 
@@ -608,7 +706,7 @@ def print_color_values(image):
         else:
             col += 1
 
-    for (col, color, val) in space_vals:
+    for col, color, val in space_vals:
         space_val = val.center(space_sizes[(col, color)])
         if color == 0:
             out += f" ({space_val}"
@@ -616,7 +714,7 @@ def print_color_values(image):
             out += f" {space_val} "
         else:
             out += f"{space_val})"
-        if col == image["width"]-1 and color == 2:
+        if col == image["width"] - 1 and color == 2:
             out += "\n"
     print(out)
 
@@ -707,7 +805,6 @@ def save_greyscale_image(image, filename, mode="PNG"):
     out.close()
 
 
-
 if __name__ == "__main__":
     # code in this block will only be run when you explicitly run your script,
     # and not when the tests are being run.  this is a good place for
@@ -724,13 +821,25 @@ if __name__ == "__main__":
     # save_color_image(blur_python, "blurred_python.png")
 
     # color_sharpened = color_filter_from_greyscale_filter(make_sharpen_filter(7))
-    # sharpened_sparrow = color_sharpened(load_color_image("test_images/sparrowchick.png"))
+    sparrow = load_color_image("test_images/sparrowchick.png")
+    # sharpened_sparrow = color_sharpened(sparrow)
     # save_color_image(sharpened_sparrow, "sharpened_sparrow.png")
 
-    # filter_cascase frog
-    filter1 = color_filter_from_greyscale_filter(edges)
-    filter2 = color_filter_from_greyscale_filter(make_blur_filter(5))
-    filt = filter_cascade([filter1, filter1, filter2, filter1])
+    # # filter_cascase frog
+    # filter1 = color_filter_from_greyscale_filter(edges)
+    # filter2 = color_filter_from_greyscale_filter(make_blur_filter(5))
+    # filt = filter_cascade([filter1, filter1, filter2, filter1])
 
-    filtered_frog = filt(load_color_image("test_images/frog.png"))
-    save_color_image(filtered_frog, "filtered_frog.png")
+    # filtered_frog = filt(load_color_image("test_images/frog.png"))
+    # save_color_image(filtered_frog, "filtered_frog.png")
+
+    # # seam carving
+    seam_carved = seam_carving(load_color_image("test_images/twocats.png"), 100)
+    save_color_image(seam_carved, "seam_carved.png")
+    # print(seam_carving(load_color_image("test_images/pattern.png"), 1))
+    # circle_sparrow = custom_feature(sparrow,
+    #                                 (0, 255, 255),
+    #                                 sparrow["width"]/2,
+    #                                 sparrow["height"]/2,
+    #                                 25)
+    # save_color_image(circle_sparrow, "circle_sparrow.png")
