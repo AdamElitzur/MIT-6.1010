@@ -515,7 +515,7 @@ def seam_carving(image, ncols):
     Starting from the given image, use the seam carving technique to remove
     ncols (an integer) columns from the image. Returns a new image.
     """
-    for i in range(ncols):
+    for _ in range(ncols):
         greyscale = greyscale_image_from_color_image(image)
         energy = compute_energy(greyscale)
         c_energy_map = cumulative_energy_map(energy)
@@ -549,8 +549,6 @@ def compute_energy(grey):
     Returns a greyscale image (represented as a dictionary).
     """
     return edges(grey)
-    # for some reason my values are one or two off. maybe rounding err?
-
 
 def cumulative_energy_map(energy):
     """
@@ -630,7 +628,7 @@ def image_without_seam(image, seam):
     in the given list.
     """
     new_pixels = image["pixels"].copy()
-    for i, value in enumerate(seam):
+    for _, value in enumerate(seam):
         new_pixels.pop(value) # remove the seam pixels
     return {
         "width": image["width"] - 1,
