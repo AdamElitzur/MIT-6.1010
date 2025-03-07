@@ -108,25 +108,6 @@ def trace_path(parents, start_element, end_element):
     return path
 
 
-# def trace_movie_path(parents, start_element, end_element):
-#     """
-#     rebuilds the path from start_element to end_element using the parents dictionary.
-
-#     Args:
-#         parents: Dictionary mapping each element to its parent element in the path
-#         start_element: The starting element of the path
-#         end_element: The ending element of the path
-
-#     returns a list representing the path from start_element to end_element
-#     """
-#     current_element = parents[end_element]
-#     path = [end_element]
-#     while current_element != start_element:
-#         path.append(current_element)
-#         current_element = parents[current_element]
-#     path.append(start_element)
-#     path.reverse()
-#     return path
 
 
 def bacon_path(transformed_data, actor_id):
@@ -143,41 +124,9 @@ def actor_to_actor_path(transformed_data, actor_id_1, actor_id_2):
     Returns a list with the shortest path of actor ids from actor_id_1 to actor_id_2,
     or None if no path exists.
     """
-    if actor_id_1 == actor_id_2:
-        return [actor_id_2]
-    agenda = {0: [actor_id_1]}
-    parents = {actor_id_1: []}
-    seen = {actor_id_1}
-
-    # one for each bacon level
-    i = 0
-    while actor_id_2 not in agenda.values():
-        # for each one in the previous bacon level
-        for j in agenda[i]:
-            # for each element in their acted_with
-            for x in transformed_data["acted_with"][j]:
-                if x not in seen:
-                    if i + 1 in agenda:
-                        agenda[i + 1].append(x)
-                    else:
-                        agenda[i + 1] = [x]
-                    # if x in parents:
-                    #     parents[x].append(x)
-                    # else:
-                    parents[x] = j
-                    seen.add(x)
-                    if x == actor_id_2:
-                        return trace_path(parents, actor_id_1, actor_id_2)
-        if i + 1 not in agenda:
-            # print(agenda)
-            # print(parents)
-            # make sure to return early if there are no actors in that bacon level
-            if actor_id_2 not in agenda.values():
-                return None
-        i += 1
-    # if n not in agenda:
-    #     return set()
-    return agenda
+    def test(actor):
+        return actor == actor_id_2
+    return actor_path(transformed_data, actor_id_1, test)
 
 
 def movie_path(transformed_data, actor_id_1, actor_id_2):
@@ -270,11 +219,6 @@ def actors_connecting_films(transformed_data, film1, film2):
     # Get all actors from the second film
     actors_in_film_2 = transformed_data["movies_to_actors"][film2]
 
-    # If the films share an actor, return that actor
-    common_actors = set(actors_in_film_1) & set(actors_in_film_2)
-    if common_actors:
-        return [next(iter(common_actors))]
-
     # Define a goal test function that checks if an actor is in film_id_2
     def is_in_film_2(actor_id):
         return actor_id in actors_in_film_2
@@ -309,6 +253,7 @@ if __name__ == "__main__":
         print(names["Gabriela Ruffo"])
         # print(next((k for k, v in names.items() if v == 1018864)))
     data = transform_data(tinydb)
+    print(data)
 
     # # finding movie path
     # result = movie_path(data, names["Joey Hazinsky"], names["Anton Radacic"])
